@@ -41,7 +41,7 @@ class SettingsScreen extends ConsumerWidget {
                   label: 'Password lock',
                   trailing: Switch.adaptive(
                     value: prefs?.lockEnabled ?? false,
-                    activeColor: AppColors.accent,
+                    activeThumbColor: AppColors.accent,
                     onChanged: (v) =>
                         ref.read(userPrefsProvider.notifier).setLockEnabled(v),
                   ),

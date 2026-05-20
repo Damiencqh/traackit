@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../core/theme/app_colors.dart';
 import '../core/theme/app_text.dart';
 
 /// "TRAACK BOX ───────" style divider used on the home screen.
