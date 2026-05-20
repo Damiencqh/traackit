@@ -147,9 +147,7 @@ class _TemplateTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
-            color: selected
-                ? const Color(0x114F6B3F)
-                : AppColors.card,
+            color: selected ? const Color(0x114F6B3F) : AppColors.card,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: selected ? AppColors.accent : AppColors.lineSoft,

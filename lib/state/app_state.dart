@@ -63,8 +63,8 @@ class UserPrefsNotifier extends AsyncNotifier<UserPrefs> {
   Future<void> setReminderTime(String time) async {
     final sp = await SharedPreferences.getInstance();
     await sp.setString(_kReminder, time);
-    state = AsyncData(
-        (state.value ?? await build()).copyWith(reminderTime: time));
+    state =
+        AsyncData((state.value ?? await build()).copyWith(reminderTime: time));
   }
 }
 
@@ -101,10 +101,7 @@ class ProjectsNotifier extends AsyncNotifier<List<Project>> {
     final current = state.value ?? [];
     final updated = [
       for (final p in current)
-        if (p.id == projectId)
-          p.copyWith(photos: [...p.photos, photo])
-        else
-          p
+        if (p.id == projectId) p.copyWith(photos: [...p.photos, photo]) else p
     ];
     await ref.read(storageServiceProvider).saveProjects(updated);
     state = AsyncData(updated);
@@ -119,6 +116,5 @@ class ProjectsNotifier extends AsyncNotifier<List<Project>> {
   }
 }
 
-final projectsProvider =
-    AsyncNotifierProvider<ProjectsNotifier, List<Project>>(
-        ProjectsNotifier.new);
+final projectsProvider = AsyncNotifierProvider<ProjectsNotifier, List<Project>>(
+    ProjectsNotifier.new);

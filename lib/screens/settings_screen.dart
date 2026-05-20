@@ -28,7 +28,8 @@ class SettingsScreen extends ConsumerWidget {
                   label: 'Name',
                   trailing: Text(
                     prefs?.name ?? '—',
-                    style: AppText.serifBody(size: 13, color: AppColors.inkMuted),
+                    style:
+                        AppText.serifBody(size: 13, color: AppColors.inkMuted),
                   ),
                   onTap: () => _editName(context, ref, prefs?.name ?? ''),
                 ),
@@ -41,9 +42,8 @@ class SettingsScreen extends ConsumerWidget {
                   trailing: Switch.adaptive(
                     value: prefs?.lockEnabled ?? false,
                     activeColor: AppColors.accent,
-                    onChanged: (v) => ref
-                        .read(userPrefsProvider.notifier)
-                        .setLockEnabled(v),
+                    onChanged: (v) =>
+                        ref.read(userPrefsProvider.notifier).setLockEnabled(v),
                   ),
                 ),
               ]),
@@ -54,7 +54,8 @@ class SettingsScreen extends ConsumerWidget {
                   label: 'Daily reminder',
                   trailing: Text(
                     prefs?.reminderTime ?? '10:00',
-                    style: AppText.serifBody(size: 13, color: AppColors.inkMuted),
+                    style:
+                        AppText.serifBody(size: 13, color: AppColors.inkMuted),
                   ),
                   onTap: () => _editReminder(
                       context, ref, prefs?.reminderTime ?? '10:00'),

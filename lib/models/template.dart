@@ -21,7 +21,6 @@ enum TemplateKind {
 
   String toJson() => name;
 
-  static TemplateKind fromJson(String value) =>
-      TemplateKind.values.firstWhere((t) => t.name == value,
-          orElse: () => TemplateKind.face);
+  static TemplateKind fromJson(String value) => TemplateKind.values
+      .firstWhere((t) => t.name == value, orElse: () => TemplateKind.face);
 }

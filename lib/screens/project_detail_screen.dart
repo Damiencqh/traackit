@@ -68,8 +68,7 @@ class ProjectDetailScreen extends ConsumerWidget {
               const SizedBox(height: 20),
               Expanded(
                 child: GridView.builder(
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 4,
                     crossAxisSpacing: 4,
                     mainAxisSpacing: 4,

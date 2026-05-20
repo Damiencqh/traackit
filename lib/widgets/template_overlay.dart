@@ -102,7 +102,8 @@ class _TemplatePainter extends CustomPainter {
         path.lineTo(cx, cy - size.height * 0.10);
         // leaves
         path.moveTo(cx - size.width * 0.20, cy);
-        path.quadraticBezierTo(cx, cy - size.height * 0.08, cx + size.width * 0.20, cy);
+        path.quadraticBezierTo(
+            cx, cy - size.height * 0.08, cx + size.width * 0.20, cy);
         return path;
 
       case TemplateKind.custom:
