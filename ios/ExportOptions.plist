@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Distribution method: app-store for TestFlight & the App Store -->
+    <key>method</key>
+    <string>app-store</string>
+
+    <!-- REPLACE these two before your first build -->
+    <key>teamID</key>
+    <string>YOUR_TEAM_ID_HERE</string>
+
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.damien.traackit</key>
+        <string>YOUR_PROVISIONING_PROFILE_NAME_HERE</string>
+    </dict>
+
+    <!-- Use manual signing (the cert we install in the workflow) -->
+    <key>signingStyle</key>
+    <string>manual</string>
+
+    <!-- Reasonable defaults -->
+    <key>destination</key>
+    <string>export</string>
+
+    <key>stripSwiftSymbols</key>
+    <true/>
+
+    <key>uploadBitcode</key>
+    <false/>
+
+    <key>uploadSymbols</key>
+    <true/>
+</dict>
+</plist>
