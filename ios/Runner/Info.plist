@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+<key>NSCameraUsageDescription</key>
+	<string>Traackit uses the camera to capture your daily progress photos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Traackit saves your finished timelapse to your photo library when you export it.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Traackit uses Face ID to unlock the app when password lock is enabled.</string>
 </dict>
 </plist>
