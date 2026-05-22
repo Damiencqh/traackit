@@ -8,18 +8,13 @@ workflows:
       app_store_connect: Traackit
 
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.damien.traackit
+      vars:
+        BUNDLE_ID: "com.damien.traackit"
       flutter: 3.44.0
       xcode: 16.4
       cocoapods: default
 
     scripts:
-      - name: Set up code signing
-        script: |
-          xcode-project use-profiles
-
       - name: Get Flutter packages
         script: |
           flutter pub get
@@ -33,7 +28,7 @@ workflows:
           flutter build ipa --release \
             --build-name=0.1.0 \
             --build-number=$(($BUILD_NUMBER + 1)) \
-            --export-options-plist=/Users/builder/export_options.plist
+            --export-options-plist=$CM_BUILD_DIR/ios/ExportOptions.plist
 
     artifacts:
       - build/ios/ipa/*.ipa
