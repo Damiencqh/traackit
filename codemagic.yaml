@@ -11,7 +11,7 @@ workflows:
       groups:
         - traackit_signing
       flutter: 3.44.0
-      xcode: 16.0
+      xcode: 26.0
       cocoapods: default
 
     scripts:
