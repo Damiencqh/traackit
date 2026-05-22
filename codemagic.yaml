@@ -15,6 +15,15 @@ workflows:
       cocoapods: default
 
     scripts:
+      - name: Install certificates and provisioning profiles
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
+
       - name: Get Flutter packages
         script: |
           flutter pub get
