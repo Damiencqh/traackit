@@ -8,12 +8,12 @@
 
     <!-- REPLACE these two before your first build -->
     <key>teamID</key>
-    <string>YOUR_TEAM_ID_HERE</string>
+    <string>KT3H4X57P2</string>
 
     <key>provisioningProfiles</key>
     <dict>
         <key>com.damien.traackit</key>
-        <string>YOUR_PROVISIONING_PROFILE_NAME_HERE</string>
+        <string>Traackit App Store</string>
     </dict>
 
     <!-- Use manual signing (the cert we install in the workflow) -->
