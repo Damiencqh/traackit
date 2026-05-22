@@ -4,7 +4,7 @@
 <dict>
     <!-- Distribution method: app-store for TestFlight & the App Store -->
     <key>method</key>
-    <string>app-store</string>
+    <string>app-store-connect</string>
 
     <!-- REPLACE these two before your first build -->
     <key>teamID</key>
