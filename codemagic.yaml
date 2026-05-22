@@ -40,15 +40,49 @@ workflows:
         script: |
           find . -name "Podfile" -execdir pod install \;
 
-      - name: Flutter build ipa
+      - name: Flutter build (archive only)
         script: |
-          flutter build ipa --release \
+          flutter build ios --release \
             --build-name=0.1.0 \
             --build-number=$(($BUILD_NUMBER + 1)) \
-            --export-options-plist=/Users/builder/export_options.plist
+            --no-codesign
+
+      - name: Archive with xcodebuild
+        script: |
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath $CM_BUILD_DIR/build/Runner.xcarchive \
+            ONLY_ACTIVE_ARCH=NO \
+            ARCHS=arm64 \
+            EXCLUDED_ARCHS= \
+            archive
+
+      - name: Inspect archive architectures
+        script: |
+          ARCHIVE_DIR=$CM_BUILD_DIR/build/Runner.xcarchive
+          echo "=== Listing all binaries in archive ==="
+          find "$ARCHIVE_DIR/Products/Applications" -type f | while read file; do
+            if file "$file" | grep -q "Mach-O"; then
+              echo ""
+              echo "Binary: $file"
+              lipo -info "$file" 2>/dev/null || echo "  (not a fat binary)"
+            fi
+          done
+
+      - name: Export IPA
+        script: |
+          xcodebuild -exportArchive \
+            -archivePath $CM_BUILD_DIR/build/Runner.xcarchive \
+            -exportPath $CM_BUILD_DIR/build/ipa \
+            -exportOptionsPlist /Users/builder/export_options.plist
 
     artifacts:
-      - build/ios/ipa/*.ipa
+      - build/ipa/*.ipa
+      - build/Runner.xcarchive
 
     publishing:
       app_store_connect:
