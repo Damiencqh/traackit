@@ -84,12 +84,31 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PROFILE_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
-      # ─── Build the IPA ──────────────────────────────────────
-      - name: Build IPA
+      # ─── Build (archive then export) ────────────────────────
+      # Flutter's `build ipa` rejects distribution-only certs (it scans
+      # for "Developer" in the cert name). Split into two xcodebuild
+      # commands to sidestep that, which is what Fastlane does internally.
+      - name: Build Flutter (no codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Archive with xcodebuild
+        working-directory: ios
         run: |
-          flutter build ipa \
-            --release \
-            --export-options-plist=ios/ExportOptions.plist
+          xcodebuild -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath $RUNNER_TEMP/Runner.xcarchive \
+            archive
+
+      - name: Export IPA
+        working-directory: ios
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath $RUNNER_TEMP/Runner.xcarchive \
+            -exportPath $RUNNER_TEMP/ipa \
+            -exportOptionsPlist ExportOptions.plist
 
       # ─── Upload to TestFlight via App Store Connect API ─────
       - name: Set up App Store Connect API key
@@ -106,7 +125,7 @@ jobs:
         run: |
           xcrun altool --upload-app \
             --type ios \
-            --file build/ios/ipa/*.ipa \
+            --file $RUNNER_TEMP/ipa/*.ipa \
             --apiKey "$ASC_API_KEY_ID" \
             --apiIssuer "$ASC_API_ISSUER_ID"
 
@@ -123,5 +142,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: traackit-ipa
-          path: build/ios/ipa/*.ipa
+          path: ${{ runner.temp }}/ipa/*.ipa
           retention-days: 14

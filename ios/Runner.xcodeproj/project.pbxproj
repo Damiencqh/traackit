@@ -584,6 +584,10 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.damien.traackit;
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = KT3H4X57P2;
+				PROVISIONING_PROFILE_SPECIFIER = "Traackit App Store";
+				CODE_SIGN_IDENTITY = "Apple Distribution";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
