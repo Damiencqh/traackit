@@ -8,20 +8,28 @@ workflows:
       app_store_connect: Traackit
 
     environment:
-      vars:
-        BUNDLE_ID: "com.damien.traackit"
+      groups:
+        - traackit_signing
       flutter: 3.44.0
       xcode: 16.4
       cocoapods: default
 
     scripts:
-      - name: Install certificates and provisioning profiles
+      - name: Install certificate and provisioning profile
         script: |
+          # Decode the certificate from base64
+          echo "$CM_CERTIFICATE" | base64 --decode > /tmp/certificate.p12
+
+          # Decode and install the provisioning profile
+          PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILE_DIR"
+          echo "$CM_PROVISIONING_PROFILE" | base64 --decode > "$PROFILE_DIR/traackit_app_store.mobileprovision"
+
+          # Create keychain and add the certificate
           keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
-          keychain add-certificates
+          keychain add-certificates --certificate /tmp/certificate.p12 --certificate-password "$CM_CERTIFICATE_PASSWORD"
+
+          # Rewrite Xcode project to use the installed profile
           xcode-project use-profiles
 
       - name: Get Flutter packages
@@ -37,7 +45,7 @@ workflows:
           flutter build ipa --release \
             --build-name=0.1.0 \
             --build-number=$(($BUILD_NUMBER + 1)) \
-            --export-options-plist=$CM_BUILD_DIR/ios/ExportOptions.plist
+            --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - build/ios/ipa/*.ipa
