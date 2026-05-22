@@ -14,7 +14,7 @@ on:
 jobs:
   build:
     name: Build & upload to TestFlight
-    runs-on: macos-15  # Apple Silicon, comes with Xcode 16 by default
+    runs-on: macos-14  # Apple Silicon, comes with Xcode 16 by default
 
     steps:
       # ─── Source ──────────────────────────────────────────────
@@ -88,8 +88,7 @@ jobs:
       # Flutter's `build ipa` rejects distribution-only certs (it scans
       # for "Developer" in the cert name). Split into two xcodebuild
       # commands to sidestep that, which is what Fastlane does internally.
-      - name: Build Flutter (no codesign)
-        run: flutter build ios --release --no-codesign
+    
 
       - name: Archive with xcodebuild
         working-directory: ios
