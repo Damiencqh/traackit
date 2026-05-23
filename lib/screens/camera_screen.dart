@@ -14,17 +14,11 @@ import '../widgets/template_overlay.dart';
 
 /// Camera capture screen.
 ///
-/// Scaffolding for v0.1:
-///   - Opens the back camera (triggering iOS permission prompt on first use)
-///   - Shows the live preview + dashed template silhouette
-///   - On shutter tap: takes a JPEG, saves it to the project's photo folder,
-///     adds a Photo to state, pops back to the previous screen.
-///
-/// Still TODO in later milestones:
-///   - Front-facing camera toggle
-///   - Ghost-of-yesterday overlay (last photo at low opacity)
-///   - Grid lines, exposure lock, tap-to-focus
-///   - Block re-capture for the same day (or offer "replace today's photo")
+/// - Opens the back camera by default (triggering iOS permission prompt on first use)
+/// - Shows the live preview + dashed template silhouette
+/// - Flip button to switch between back/front cameras
+/// - On shutter tap: takes a JPEG, saves it to the project's photo folder,
+///   adds a Photo to state, pops back to the previous screen.
 class CameraScreen extends ConsumerStatefulWidget {
   final Project project;
 
@@ -39,6 +33,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   Future<void>? _initFuture;
   bool _capturing = false;
   String? _error;
+  List<CameraDescription> _cameras = [];
+  int _currentCameraIndex = 0;
 
   @override
   void initState() {
@@ -61,15 +57,23 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
       return;
     }
 
-    // Prefer the back camera; fall back to whatever's first.
-    final back = cameras.firstWhere(
+    // Save the camera list and start with the back camera if available.
+    _cameras = cameras;
+    final backIndex = cameras.indexWhere(
       (c) => c.lensDirection == CameraLensDirection.back,
-      orElse: () => cameras.first,
     );
+    _currentCameraIndex = backIndex >= 0 ? backIndex : 0;
 
-    // 2. Initialise controller
+    await _initController(_cameras[_currentCameraIndex]);
+  }
+
+  /// Initialise a CameraController for a given camera description.
+  /// Disposes the previous controller cleanly first.
+  Future<void> _initController(CameraDescription camera) async {
+    await _controller?.dispose();
+
     final controller = CameraController(
-      back,
+      camera,
       ResolutionPreset.high,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.jpeg,
@@ -83,6 +87,18 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
     }
     if (!mounted) return;
     setState(() => _controller = controller);
+  }
+
+  /// Switches between back and front (or whatever cameras are available).
+  Future<void> _flipCamera() async {
+    if (_cameras.length < 2 || _capturing) return;
+
+    final newIndex = (_currentCameraIndex + 1) % _cameras.length;
+    setState(() {
+      _currentCameraIndex = newIndex;
+      _controller = null; // shows loading spinner during the flip
+    });
+    await _initController(_cameras[newIndex]);
   }
 
   @override
@@ -199,7 +215,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                 ),
               ),
 
-              // Shutter
+              // Shutter — bottom center.
               Positioned(
                 bottom: 40,
                 left: 0,
@@ -207,6 +223,29 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                 child:
                     Center(child: _Shutter(onTap: _capture, busy: _capturing)),
               ),
+
+              // Flip-camera button — bottom right, alongside the shutter.
+              if (_cameras.length > 1)
+                Positioned(
+                  bottom: 50,
+                  right: 32,
+                  child: GestureDetector(
+                    onTap: _flipCamera,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.15),
+                      ),
+                      child: const Icon(
+                        Icons.cameraswitch_outlined,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           );
         },
