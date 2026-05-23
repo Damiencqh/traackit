@@ -4,7 +4,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
-import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 import '../core/theme/app_text.dart';
@@ -16,8 +15,7 @@ import '../widgets/template_overlay.dart';
 /// Camera capture screen.
 ///
 /// Scaffolding for v0.1:
-///   - Requests camera permission
-///   - Opens the back camera
+///   - Opens the back camera (triggering iOS permission prompt on first use)
 ///   - Shows the live preview + dashed template silhouette
 ///   - On shutter tap: takes a JPEG, saves it to the project's photo folder,
 ///     adds a Photo to state, pops back to the previous screen.
@@ -49,28 +47,15 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   }
 
   Future<void> _setupCamera() async {
-    // 1. Permission — check status first, then request if needed.
-    // The two-step pattern works around an iOS quirk where calling
-    // request() too early can silently return "denied" without prompting.
-    var status = await Permission.camera.status;
-
-    if (status.isDenied) {
-      // First-time request
-      status = await Permission.camera.request();
-    }
-
-    if (status.isPermanentlyDenied) {
-      setState(() => _error =
-          'Camera access was denied. Open iOS Settings → Traackit to enable it.');
+    // 1. Discover cameras — this triggers iOS's camera permission prompt
+    //    on first use via AVFoundation directly (no permission_handler).
+    final List<CameraDescription> cameras;
+    try {
+      cameras = await availableCameras();
+    } catch (e) {
+      setState(() => _error = 'Camera access denied or unavailable: $e');
       return;
     }
-
-    if (!status.isGranted) {
-      setState(() => _error = 'Camera permission denied.');
-      return;
-    }
-    // 2. Discover cameras
-    final cameras = await availableCameras();
     if (cameras.isEmpty) {
       setState(() => _error = 'No cameras on this device.');
       return;
@@ -82,7 +67,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
       orElse: () => cameras.first,
     );
 
-    // 3. Initialise controller
+    // 2. Initialise controller
     final controller = CameraController(
       back,
       ResolutionPreset.high,
@@ -90,7 +75,12 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
 
-    await controller.initialize();
+    try {
+      await controller.initialize();
+    } catch (e) {
+      setState(() => _error = 'Could not initialise camera: $e');
+      return;
+    }
     if (!mounted) return;
     setState(() => _controller = controller);
   }
