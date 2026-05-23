@@ -109,10 +109,24 @@ class ProjectsNotifier extends AsyncNotifier<List<Project>> {
 
   Future<void> deleteProject(String id) async {
     final current = state.value ?? [];
+    final project = current.firstWhere(
+      (p) => p.id == id,
+      orElse: () => throw StateError('Project not found'),
+    );
+
+    // Delete all photo files for this project from disk.
+    final storage = ref.read(storageServiceProvider);
+    for (final photo in project.photos) {
+      try {
+        await storage.deletePhotoFile(photo.filePath);
+      } catch (_) {
+        // Best-effort: a missing file shouldn't block project deletion.
+      }
+    }
+
     final updated = current.where((p) => p.id != id).toList();
-    await ref.read(storageServiceProvider).saveProjects(updated);
+    await storage.saveProjects(updated);
     state = AsyncData(updated);
-    // (we don't delete the photo folder for now — could in a later milestone)
   }
 }
 

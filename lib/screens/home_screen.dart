@@ -117,30 +117,103 @@ class _Greeting extends StatelessWidget {
   }
 }
 
-class _ProjectList extends StatelessWidget {
+class _ProjectList extends ConsumerWidget {
   final List<Project> projects;
   const _ProjectList({required this.projects});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ListView.separated(
       padding: const EdgeInsets.only(bottom: 96),
       itemCount: projects.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, i) {
         final p = projects[i];
-        return ProjectCard(
-          project: p,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProjectDetailScreen(projectId: p.id),
+        return Dismissible(
+          key: ValueKey(p.id),
+          direction: DismissDirection.endToStart,
+          // Confirm before deleting so a stray swipe doesn't wipe months of photos.
+          confirmDismiss: (_) async {
+            return await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text(
+                      'Delete this traack?',
+                      style: AppText.serifBody(size: 18),
+                    ),
+                    content: Text(
+                      'Every photo in "${p.name}" will be gone. This cannot be undone.',
+                      style: AppText.ui(size: 14, color: AppColors.inkMuted),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text(
+                          'Cancel',
+                          style:
+                              AppText.ui(size: 14, color: AppColors.inkMuted),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFFB45050),
+                        ),
+                        child: Text(
+                          'Delete',
+                          style: AppText.ui(
+                            size: 14,
+                            weight: FontWeight.w600,
+                            color: const Color(0xFFB45050),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ) ??
+                false;
+          },
+          onDismissed: (_) {
+            ref.read(projectsProvider.notifier).deleteProject(p.id);
+          },
+          background: Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.symmetric(horizontal: 26),
+            decoration: BoxDecoration(
+              color: const Color(0xFFB45050),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.delete_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'DELETE',
+                  style: AppText.ui(
+                    size: 11,
+                    color: Colors.white,
+                    weight: FontWeight.w600,
+                    letterSpacing: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
-          onCapture: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => CameraScreen(project: p),
+          child: ProjectCard(
+            project: p,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProjectDetailScreen(projectId: p.id),
+              ),
+            ),
+            onCapture: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => CameraScreen(project: p),
+              ),
             ),
           ),
         );
