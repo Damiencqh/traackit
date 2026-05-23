@@ -49,13 +49,26 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   }
 
   Future<void> _setupCamera() async {
-    // 1. Permission
-    final status = await Permission.camera.request();
+    // 1. Permission — check status first, then request if needed.
+    // The two-step pattern works around an iOS quirk where calling
+    // request() too early can silently return "denied" without prompting.
+    var status = await Permission.camera.status;
+
+    if (status.isDenied) {
+      // First-time request
+      status = await Permission.camera.request();
+    }
+
+    if (status.isPermanentlyDenied) {
+      setState(() => _error =
+          'Camera access was denied. Open iOS Settings → Traackit to enable it.');
+      return;
+    }
+
     if (!status.isGranted) {
       setState(() => _error = 'Camera permission denied.');
       return;
     }
-
     // 2. Discover cameras
     final cameras = await availableCameras();
     if (cameras.isEmpty) {
