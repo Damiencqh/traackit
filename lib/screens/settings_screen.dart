@@ -98,10 +98,27 @@ class SettingsScreen extends ConsumerWidget {
       minute: int.tryParse(parts.length > 1 ? parts[1] : '0') ?? 0,
     );
     final picked = await showTimePicker(context: context, initialTime: initial);
-    if (picked != null) {
-      final formatted =
-          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-      await ref.read(userPrefsProvider.notifier).setReminderTime(formatted);
+    if (picked == null) return;
+
+    // Ask iOS for notification permission before saving the time —
+    // this triggers the system prompt the first time. Subsequent calls
+    // return the cached answer instantly.
+    final notif = ref.read(notificationServiceProvider);
+    final granted = await notif.requestPermission();
+
+    final formatted =
+        '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+    await ref.read(userPrefsProvider.notifier).setReminderTime(formatted);
+
+    if (!granted && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Notifications not allowed. Time saved — enable in iOS Settings → Traackit to receive it.',
+          ),
+          duration: Duration(seconds: 4),
+        ),
+      );
     }
   }
 }

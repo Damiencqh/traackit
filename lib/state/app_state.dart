@@ -3,12 +3,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/photo.dart';
 import '../models/project.dart';
+import '../services/notification_service.dart';
 import '../services/storage_service.dart';
 
 // ─── Services ──────────────────────────────────────────────────
 
 final storageServiceProvider = Provider<StorageService>((ref) {
   return StorageService();
+});
+
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return NotificationService();
 });
 
 // ─── User preferences (name, lock, reminders) ──────────────────
@@ -65,6 +70,9 @@ class UserPrefsNotifier extends AsyncNotifier<UserPrefs> {
     await sp.setString(_kReminder, time);
     state =
         AsyncData((state.value ?? await build()).copyWith(reminderTime: time));
+
+    // Reschedule the daily reminder for the new time.
+    await ref.read(notificationServiceProvider).scheduleDailyReminder(time);
   }
 }
 
@@ -114,13 +122,13 @@ class ProjectsNotifier extends AsyncNotifier<List<Project>> {
       orElse: () => throw StateError('Project not found'),
     );
 
-    // Delete all photo files for this project from disk.
+    // Best-effort: delete photo files from disk.
     final storage = ref.read(storageServiceProvider);
     for (final photo in project.photos) {
       try {
         await storage.deletePhotoFile(photo.filePath);
       } catch (_) {
-        // Best-effort: a missing file shouldn't block project deletion.
+        // missing file shouldn't block project deletion
       }
     }
 

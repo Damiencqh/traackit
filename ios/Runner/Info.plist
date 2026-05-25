@@ -72,5 +72,9 @@
 	<string>Traackit saves your finished timelapse to your photo library when you export it.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Traackit uses Face ID to unlock the app when password lock is enabled.</string>
+
+<key>NSUserNotificationsUsageDescription</key>
+	<string>Traackit sends a gentle daily reminder to capture today's photo.</string>
+
 </dict>
 </plist>
