@@ -10,6 +10,7 @@ import 'package:timezone/timezone.dart' as tz;
 class NotificationService {
   static const _channelId = 'traackit_daily_reminder';
   static const _notificationId = 1;
+  static const _testNotificationId = 999;
 
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
@@ -99,6 +100,27 @@ class NotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time, // repeat daily
+    );
+  }
+
+  /// Sends an immediate notification — used to test that the
+  /// notification system works end-to-end.
+  Future<void> sendTestNotification() async {
+    await init();
+    const details = NotificationDetails(
+      iOS: DarwinNotificationDetails(),
+      android: AndroidNotificationDetails(
+        _channelId,
+        'Daily reminder',
+        importance: Importance.defaultImportance,
+        priority: Priority.defaultPriority,
+      ),
+    );
+    await _plugin.show(
+      _testNotificationId,
+      'Test notification',
+      'If you see this, notifications work.',
+      details,
     );
   }
 }
