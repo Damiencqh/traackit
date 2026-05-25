@@ -60,6 +60,19 @@ class SettingsScreen extends ConsumerWidget {
                   onTap: () => _editReminder(
                       context, ref, prefs?.reminderTime ?? '10:00'),
                 ),
+                _Row(
+                  label: 'Send test notification',
+                  trailing: const Icon(
+                    Icons.send_outlined,
+                    size: 18,
+                    color: AppColors.inkMuted,
+                  ),
+                  onTap: () async {
+                    final notif = ref.read(notificationServiceProvider);
+                    await notif.requestPermission();
+                    await notif.sendTestNotification();
+                  },
+                ),
               ]),
             ],
           ),
