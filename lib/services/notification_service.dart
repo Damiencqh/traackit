@@ -1,12 +1,9 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-/// Wraps flutter_local_notifications for Traackit's daily reminder.
-///
-/// One scheduled notification fires daily at the time the user
-/// picks in Settings. iOS handles persistence; even if the app is
-/// closed (or rebooted), the schedule survives.
 class NotificationService {
   static const _channelId = 'traackit_daily_reminder';
   static const _notificationId = 1;
@@ -19,6 +16,7 @@ class NotificationService {
 
   Future<void> init() async {
     if (_initialized) return;
+    developer.log('NotificationService.init() starting', name: 'traackit');
 
     tz_data.initializeTimeZones();
 
@@ -31,14 +29,14 @@ class NotificationService {
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
     );
 
-    await _plugin.initialize(initSettings);
+    final ok = await _plugin.initialize(initSettings);
+    developer.log('NotificationService.init() returned: $ok', name: 'traackit');
     _initialized = true;
   }
 
-  /// Asks iOS / Android for permission to display notifications.
-  /// Returns true if granted.
   Future<bool> requestPermission() async {
     await init();
+    developer.log('requestPermission() called', name: 'traackit');
 
     final iosImpl = _plugin.resolvePlatformSpecificImplementation<
         IOSFlutterLocalNotificationsPlugin>();
@@ -48,6 +46,8 @@ class NotificationService {
         badge: true,
         sound: true,
       );
+      developer.log('iOS requestPermissions returned: $granted',
+          name: 'traackit');
       return granted ?? false;
     }
 
@@ -61,8 +61,6 @@ class NotificationService {
     return false;
   }
 
-  /// Schedules (or reschedules) the daily reminder at HH:mm in the user's
-  /// local timezone. Pass null to cancel.
   Future<void> scheduleDailyReminder(String? hhmm) async {
     await init();
     await _plugin.cancel(_notificationId);
@@ -80,7 +78,12 @@ class NotificationService {
     }
 
     const details = NotificationDetails(
-      iOS: DarwinNotificationDetails(),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        interruptionLevel: InterruptionLevel.active,
+      ),
       android: AndroidNotificationDetails(
         _channelId,
         'Daily reminder',
@@ -99,16 +102,21 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // repeat daily
+      matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 
-  /// Sends an immediate notification — used to test that the
-  /// notification system works end-to-end.
   Future<void> sendTestNotification() async {
     await init();
+    developer.log('sendTestNotification() called', name: 'traackit');
+
     const details = NotificationDetails(
-      iOS: DarwinNotificationDetails(),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        interruptionLevel: InterruptionLevel.active,
+      ),
       android: AndroidNotificationDetails(
         _channelId,
         'Daily reminder',
@@ -116,11 +124,19 @@ class NotificationService {
         priority: Priority.defaultPriority,
       ),
     );
-    await _plugin.show(
-      _testNotificationId,
-      'Test notification',
-      'If you see this, notifications work.',
-      details,
-    );
+
+    try {
+      await _plugin.show(
+        _testNotificationId,
+        'Test notification',
+        'If you see this, notifications work.',
+        details,
+      );
+      developer.log('Notification show() completed without exception',
+          name: 'traackit');
+    } catch (e, stack) {
+      developer.log('Notification show() threw: $e',
+          name: 'traackit', error: e, stackTrace: stack);
+    }
   }
 }

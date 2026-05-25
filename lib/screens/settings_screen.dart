@@ -69,8 +69,27 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   onTap: () async {
                     final notif = ref.read(notificationServiceProvider);
-                    await notif.requestPermission();
-                    await notif.sendTestNotification();
+                    try {
+                      final granted = await notif.requestPermission();
+                      await notif.sendTestNotification();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Notification sent (granted=$granted). Lock phone to see it.',
+                          ),
+                          duration: const Duration(seconds: 6),
+                        ),
+                      );
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Notification error: $e'),
+                          duration: const Duration(seconds: 8),
+                        ),
+                      );
+                    }
                   },
                 ),
               ]),
