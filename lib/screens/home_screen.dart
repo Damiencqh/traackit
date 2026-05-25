@@ -132,7 +132,6 @@ class _ProjectList extends ConsumerWidget {
         return Dismissible(
           key: ValueKey(p.id),
           direction: DismissDirection.endToStart,
-          // Confirm before deleting so a stray swipe doesn't wipe months of photos.
           confirmDismiss: (_) async {
             return await showDialog<bool>(
                   context: context,
@@ -215,6 +214,7 @@ class _ProjectList extends ConsumerWidget {
                 builder: (_) => CameraScreen(project: p),
               ),
             ),
+            onLongPress: () => _renameProject(context, ref, p),
           ),
         );
       },
@@ -248,5 +248,50 @@ class _EmptyState extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<void> _renameProject(
+    BuildContext context, WidgetRef ref, Project project) async {
+  final controller = TextEditingController(text: project.name);
+
+  final newName = await showDialog<String>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text('Rename traack', style: AppText.serifBody(size: 18)),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        style: AppText.serifBody(size: 16),
+        decoration: const InputDecoration(border: OutlineInputBorder()),
+        onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(
+            'Cancel',
+            style: AppText.ui(size: 14, color: AppColors.inkMuted),
+          ),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+          child: Text(
+            'Save',
+            style: AppText.ui(
+              size: 14,
+              weight: FontWeight.w600,
+              color: AppColors.accent,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  if (newName != null && newName.isNotEmpty && newName != project.name) {
+    await ref
+        .read(projectsProvider.notifier)
+        .renameProject(project.id, newName);
   }
 }

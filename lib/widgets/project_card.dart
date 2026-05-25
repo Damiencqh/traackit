@@ -9,60 +9,68 @@ class ProjectCard extends StatelessWidget {
   final Project project;
   final VoidCallback onTap;
   final VoidCallback onCapture;
+  final VoidCallback? onLongPress;
 
   const ProjectCard({
     super.key,
     required this.project,
     required this.onTap,
     required this.onCapture,
+    this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
     final hasToday = project.hasPhotoToday;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.lineSoft),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        project.name,
-                        style: AppText.serifBody(size: 16.5),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${project.daysIn} days in',
-                        style: AppText.ui(
-                          size: 11.5,
-                          color: AppColors.inkMuted,
+    // GestureDetector for long-press at the outer level. Using
+    // InkWell.onLongPress instead would conflict with the parent
+    // Dismissible's pan gesture recognizer.
+    return GestureDetector(
+      onLongPress: onLongPress,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.lineSoft),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          project.name,
+                          style: AppText.serifBody(size: 16.5),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 6),
+                        Text(
+                          '${project.daysIn} days in',
+                          style: AppText.ui(
+                            size: 11.5,
+                            color: AppColors.inkMuted,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                if (hasToday)
-                  const _UpdatedPill()
-                else
-                  _AddProgressButton(onTap: onCapture),
-              ],
+                  const SizedBox(width: 12),
+                  if (hasToday)
+                    const _UpdatedPill()
+                  else
+                    _AddProgressButton(onTap: onCapture),
+                ],
+              ),
             ),
           ),
         ),
