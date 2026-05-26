@@ -60,38 +60,6 @@ class SettingsScreen extends ConsumerWidget {
                   onTap: () => _editReminder(
                       context, ref, prefs?.reminderTime ?? '10:00'),
                 ),
-                _Row(
-                  label: 'Send test notification',
-                  trailing: const Icon(
-                    Icons.send_outlined,
-                    size: 18,
-                    color: AppColors.inkMuted,
-                  ),
-                  onTap: () async {
-                    final notif = ref.read(notificationServiceProvider);
-                    try {
-                      final granted = await notif.requestPermission();
-                      await notif.sendTestNotification();
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Notification sent (granted=$granted). Lock phone to see it.',
-                          ),
-                          duration: const Duration(seconds: 6),
-                        ),
-                      );
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Notification error: $e'),
-                          duration: const Duration(seconds: 8),
-                        ),
-                      );
-                    }
-                  },
-                ),
               ]),
             ],
           ),
