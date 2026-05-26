@@ -10,20 +10,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  cupertino_icons: ^1.0.6
   flutter_riverpod: ^2.6.1
-  camera: ^0.11.0+2
-  permission_handler: ^11.3.1
+  shared_preferences: ^2.3.5
   path_provider: ^2.1.5
   path: ^1.9.0
-  shared_preferences: ^2.3.3
-  uuid: ^4.5.1
   intl: ^0.19.0
   google_fonts: ^6.2.1
+  camera: ^0.11.0+2
+  uuid: ^4.5.1
   flutter_local_notifications: ^17.2.4
   timezone: ^0.9.4
+  flutter_timezone: ^4.1.1
   local_auth: ^2.3.0
-  cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:

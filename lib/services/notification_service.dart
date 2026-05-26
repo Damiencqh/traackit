@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -19,6 +20,17 @@ class NotificationService {
     developer.log('NotificationService.init() starting', name: 'traackit');
 
     tz_data.initializeTimeZones();
+
+    // CRITICAL: ask the device for its current timezone and set tz.local.
+    // Without this, tz.local defaults to UTC and scheduled times are off.
+    try {
+      final localName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(localName));
+      developer.log('Set local timezone to: $localName', name: 'traackit');
+    } catch (e) {
+      developer.log('Failed to set local timezone: $e — falling back to UTC',
+          name: 'traackit');
+    }
 
     const initSettings = InitializationSettings(
       iOS: DarwinInitializationSettings(
@@ -76,6 +88,10 @@ class NotificationService {
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
+
+    developer.log(
+        'Scheduling reminder for $scheduled (local zone: ${tz.local.name})',
+        name: 'traackit');
 
     const details = NotificationDetails(
       iOS: DarwinNotificationDetails(
