@@ -27,18 +27,30 @@ class UserPrefs {
   final String name;
   final bool lockEnabled;
   final String reminderTime; // "HH:mm"
+  final bool ghostEnabled;
+  final double ghostOpacity;
 
   const UserPrefs({
     required this.name,
     required this.lockEnabled,
     required this.reminderTime,
+    required this.ghostEnabled,
+    required this.ghostOpacity,
   });
 
-  UserPrefs copyWith({String? name, bool? lockEnabled, String? reminderTime}) =>
+  UserPrefs copyWith({
+    String? name,
+    bool? lockEnabled,
+    String? reminderTime,
+    bool? ghostEnabled,
+    double? ghostOpacity,
+  }) =>
       UserPrefs(
         name: name ?? this.name,
         lockEnabled: lockEnabled ?? this.lockEnabled,
         reminderTime: reminderTime ?? this.reminderTime,
+        ghostEnabled: ghostEnabled ?? this.ghostEnabled,
+        ghostOpacity: ghostOpacity ?? this.ghostOpacity,
       );
 }
 
@@ -46,6 +58,8 @@ class UserPrefsNotifier extends AsyncNotifier<UserPrefs> {
   static const _kName = 'user.name';
   static const _kLock = 'user.lockEnabled';
   static const _kReminder = 'user.reminderTime';
+  static const _kGhostEnabled = 'user.ghostEnabled';
+  static const _kGhostOpacity = 'user.ghostOpacity';
 
   @override
   Future<UserPrefs> build() async {
@@ -54,6 +68,8 @@ class UserPrefsNotifier extends AsyncNotifier<UserPrefs> {
       name: sp.getString(_kName) ?? 'there',
       lockEnabled: sp.getBool(_kLock) ?? false,
       reminderTime: sp.getString(_kReminder) ?? '10:00',
+      ghostEnabled: sp.getBool(_kGhostEnabled) ?? true,
+      ghostOpacity: sp.getDouble(_kGhostOpacity) ?? 0.30,
     );
   }
 
@@ -78,6 +94,20 @@ class UserPrefsNotifier extends AsyncNotifier<UserPrefs> {
 
     // Reschedule the daily reminder for the new time.
     await ref.read(notificationServiceProvider).scheduleDailyReminder(time);
+  }
+
+  Future<void> setGhostEnabled(bool enabled) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kGhostEnabled, enabled);
+    state = AsyncData(
+        (state.value ?? await build()).copyWith(ghostEnabled: enabled));
+  }
+
+  Future<void> setGhostOpacity(double opacity) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setDouble(_kGhostOpacity, opacity);
+    state = AsyncData(
+        (state.value ?? await build()).copyWith(ghostOpacity: opacity));
   }
 }
 

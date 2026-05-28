@@ -11,11 +11,12 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prefs = ref.watch(userPrefsProvider).value;
+    final ghostEnabled = prefs?.ghostEnabled ?? true;
 
     return Scaffold(
       appBar: AppBar(),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,6 +62,25 @@ class SettingsScreen extends ConsumerWidget {
                       context, ref, prefs?.reminderTime ?? '10:00'),
                 ),
               ]),
+              const SizedBox(height: 26),
+              _GroupLabel('CAMERA'),
+              _SettingsCard(children: [
+                _Row(
+                  label: 'Ghost of yesterday',
+                  trailing: Switch.adaptive(
+                    value: ghostEnabled,
+                    activeThumbColor: AppColors.accent,
+                    onChanged: (v) =>
+                        ref.read(userPrefsProvider.notifier).setGhostEnabled(v),
+                  ),
+                ),
+                if (ghostEnabled)
+                  _GhostOpacityRow(
+                    opacity: prefs?.ghostOpacity ?? 0.30,
+                    onChanged: (v) =>
+                        ref.read(userPrefsProvider.notifier).setGhostOpacity(v),
+                  ),
+              ]),
             ],
           ),
         ),
@@ -100,9 +120,6 @@ class SettingsScreen extends ConsumerWidget {
     final picked = await showTimePicker(context: context, initialTime: initial);
     if (picked == null) return;
 
-    // Ask iOS for notification permission before saving the time —
-    // this triggers the system prompt the first time. Subsequent calls
-    // return the cached answer instantly.
     final notif = ref.read(notificationServiceProvider);
     final granted = await notif.requestPermission();
 
@@ -120,6 +137,58 @@ class SettingsScreen extends ConsumerWidget {
         ),
       );
     }
+  }
+}
+
+class _GhostOpacityRow extends StatefulWidget {
+  final double opacity;
+  final ValueChanged<double> onChanged; // called on change-end (persists)
+  const _GhostOpacityRow({required this.opacity, required this.onChanged});
+
+  @override
+  State<_GhostOpacityRow> createState() => _GhostOpacityRowState();
+}
+
+class _GhostOpacityRowState extends State<_GhostOpacityRow> {
+  late double _value = widget.opacity;
+
+  @override
+  void didUpdateWidget(_GhostOpacityRow old) {
+    super.didUpdateWidget(old);
+    if (old.opacity != widget.opacity) _value = widget.opacity;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = (_value * 100).round();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text('Ghost opacity', style: AppText.ui(size: 14)),
+              ),
+              Text('$pct%',
+                  style:
+                      AppText.serifBody(size: 13, color: AppColors.inkMuted)),
+            ],
+          ),
+          Slider(
+            value: _value,
+            min: 0.1,
+            max: 0.9,
+            divisions: 16,
+            activeColor: AppColors.accent,
+            label: '$pct%',
+            onChanged: (v) => setState(() => _value = v),
+            onChangeEnd: widget.onChanged,
+          ),
+        ],
+      ),
+    );
   }
 }
 
