@@ -15,7 +15,7 @@ import '../widgets/template_overlay.dart';
 /// Camera capture screen.
 ///
 /// - Opens the back camera by default (triggering iOS permission prompt on first use)
-/// - Shows the live preview + dashed template silhouette
+/// - Shows the live preview + ghost-of-yesterday + dashed template silhouette
 /// - Flip button to switch between back/front cameras
 /// - On shutter tap: takes a JPEG, saves it to the project's photo folder,
 ///   adds a Photo to state, pops back to the previous screen.
@@ -35,6 +35,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
   String? _error;
   List<CameraDescription> _cameras = [];
   int _currentCameraIndex = 0;
+
+  /// How visible the previous-day "ghost" is over the live preview.
+  /// 0.0 = invisible, 1.0 = opaque. 0.30 is a good alignment balance.
+  static const double _ghostOpacity = 0.30;
 
   @override
   void initState() {
@@ -196,6 +200,31 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
                   ),
                 ),
               ),
+
+              // Ghost of yesterday — last photo at low opacity, for alignment.
+              if (widget.project.latestPhoto != null)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: FutureBuilder<String>(
+                      future: ref.read(storageServiceProvider).resolvePhotoPath(
+                          widget.project.latestPhoto!.filePath),
+                      builder: (context, ghostSnap) {
+                        if (!ghostSnap.hasData) {
+                          return const SizedBox.shrink();
+                        }
+                        return Opacity(
+                          opacity: _ghostOpacity,
+                          child: Image.file(
+                            File(ghostSnap.data!),
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                const SizedBox.shrink(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
 
               // Template silhouette overlay
               Positioned.fill(

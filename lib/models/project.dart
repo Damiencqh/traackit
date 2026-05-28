@@ -30,6 +30,15 @@ class Project {
         p.capturedAt.day == now.day);
   }
 
+  /// The most recently captured photo, or null if none exist yet.
+  /// Used by the camera screen to render the "ghost of yesterday" overlay.
+  Photo? get latestPhoto {
+    if (photos.isEmpty) return null;
+    final sorted = [...photos]
+      ..sort((a, b) => a.capturedAt.compareTo(b.capturedAt));
+    return sorted.last;
+  }
+
   Project copyWith({
     String? name,
     TemplateKind? template,
