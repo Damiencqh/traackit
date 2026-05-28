@@ -155,12 +155,12 @@ class ProjectDetailScreen extends ConsumerWidget {
       builder: (_) => _SpeedPickerDialog(photoCount: project.photos.length),
     );
     if (fps == null) return; // cancelled
+    if (!context.mounted) return;
 
     // Capture the render box now to anchor the iOS share sheet.
     // iOS 26 throws if sharePositionOrigin is a zero rect.
     final box = context.findRenderObject() as RenderBox?;
 
-    if (!context.mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
