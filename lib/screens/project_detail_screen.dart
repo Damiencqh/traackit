@@ -3,14 +3,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text.dart';
+import '../models/project.dart';
 import '../state/app_state.dart';
 import 'camera_screen.dart';
 
-/// View a single project: big day counter + grid of photos so far.
-/// Timelapse export lives here in a later milestone.
+/// View a single project: big day counter + grid of photos so far,
+/// plus the timelapse export button.
 class ProjectDetailScreen extends ConsumerWidget {
   final String projectId;
   const ProjectDetailScreen({super.key, required this.projectId});
@@ -123,13 +125,7 @@ class ProjectDetailScreen extends ConsumerWidget {
                   ),
                   onPressed: project.photos.length < 2
                       ? null
-                      : () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Timelapse export — coming soon'),
-                            ),
-                          );
-                        },
+                      : () => _generateTimelapse(context, ref, project),
                   child: Text(
                     'GENERATE TIMELAPSE',
                     style: AppText.ui(
@@ -146,6 +142,45 @@ class ProjectDetailScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _generateTimelapse(
+    BuildContext context,
+    WidgetRef ref,
+    Project project,
+  ) async {
+    // Capture the render box now to anchor the iOS share sheet.
+    // iOS 26 throws if sharePositionOrigin is a zero rect.
+    final box = context.findRenderObject() as RenderBox?;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _GeneratingDialog(),
+    );
+
+    try {
+      final path = await ref.read(timelapseServiceProvider).generate(project);
+
+      if (!context.mounted) return;
+      Navigator.pop(context); // close the progress dialog
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(path)],
+          text: '${project.name} — ${project.daysIn} days',
+          sharePositionOrigin: box != null
+              ? box.localToGlobal(Offset.zero) & box.size
+              : const Rect.fromLTWH(0, 0, 1, 1),
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Couldn't generate timelapse: $e")),
+      );
+    }
   }
 }
 
@@ -171,6 +206,41 @@ class _TodayTile extends StatelessWidget {
             onTap == null ? Icons.check : Icons.add,
             color: onTap == null ? AppColors.inkSoft : AppColors.accent,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GeneratingDialog extends StatelessWidget {
+  const _GeneratingDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: AppColors.paper,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 36,
+              height: 36,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: AppColors.accent,
+              ),
+            ),
+            const SizedBox(height: 22),
+            Text('Weaving your days', style: AppText.serifBody(size: 18)),
+            const SizedBox(height: 6),
+            Text(
+              'This may take a moment.',
+              style: AppText.ui(size: 12, color: AppColors.inkMuted),
+            ),
+          ],
         ),
       ),
     );

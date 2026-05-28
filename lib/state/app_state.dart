@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/timelapse_service.dart';
 import '../models/photo.dart';
 import '../models/project.dart';
 import '../services/notification_service.dart';
@@ -14,6 +15,10 @@ final storageServiceProvider = Provider<StorageService>((ref) {
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
+});
+
+final timelapseServiceProvider = Provider<TimelapseService>((ref) {
+  return TimelapseService(ref.read(storageServiceProvider));
 });
 
 // ─── User preferences (name, lock, reminders) ──────────────────
