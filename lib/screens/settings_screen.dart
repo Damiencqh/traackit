@@ -39,12 +39,11 @@ class SettingsScreen extends ConsumerWidget {
               _GroupLabel('PRIVACY'),
               _SettingsCard(children: [
                 _Row(
-                  label: 'Password lock',
+                  label: 'App lock (Face ID)',
                   trailing: Switch.adaptive(
                     value: prefs?.lockEnabled ?? false,
                     activeThumbColor: AppColors.accent,
-                    onChanged: (v) =>
-                        ref.read(userPrefsProvider.notifier).setLockEnabled(v),
+                    onChanged: (v) => _toggleLock(context, ref, v),
                   ),
                 ),
               ]),
@@ -138,6 +137,30 @@ class SettingsScreen extends ConsumerWidget {
       );
     }
   }
+}
+
+Future<void> _toggleLock(
+    BuildContext context, WidgetRef ref, bool enable) async {
+  if (enable) {
+    final auth = ref.read(authServiceProvider);
+    final supported = await auth.isSupported();
+    if (!supported) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Set up Face ID or a device passcode in iOS Settings first.',
+            ),
+          ),
+        );
+      }
+      return; // leave the switch off
+    }
+    // Confirm they can actually authenticate before turning it on.
+    final ok = await auth.authenticate();
+    if (!ok) return; // failed/cancelled — leave it off
+  }
+  await ref.read(userPrefsProvider.notifier).setLockEnabled(enable);
 }
 
 class _GhostOpacityRow extends StatefulWidget {

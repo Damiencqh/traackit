@@ -6,6 +6,7 @@ import '../models/photo.dart';
 import '../models/project.dart';
 import '../services/notification_service.dart';
 import '../services/storage_service.dart';
+import '../services/auth_service.dart';
 
 // ─── Services ──────────────────────────────────────────────────
 
@@ -20,6 +21,8 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 final timelapseServiceProvider = Provider<TimelapseService>((ref) {
   return TimelapseService(ref.read(storageServiceProvider));
 });
+
+final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
 // ─── User preferences (name, lock, reminders) ──────────────────
 
