@@ -149,10 +149,18 @@ class ProjectDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     Project project,
   ) async {
+    // Let the user choose playback speed first.
+    final fps = await showDialog<int>(
+      context: context,
+      builder: (_) => _SpeedPickerDialog(photoCount: project.photos.length),
+    );
+    if (fps == null) return; // cancelled
+
     // Capture the render box now to anchor the iOS share sheet.
     // iOS 26 throws if sharePositionOrigin is a zero rect.
     final box = context.findRenderObject() as RenderBox?;
 
+    if (!context.mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -160,7 +168,8 @@ class ProjectDetailScreen extends ConsumerWidget {
     );
 
     try {
-      final path = await ref.read(timelapseServiceProvider).generate(project);
+      final path =
+          await ref.read(timelapseServiceProvider).generate(project, fps: fps);
 
       if (!context.mounted) return;
       Navigator.pop(context); // close the progress dialog
@@ -243,6 +252,78 @@ class _GeneratingDialog extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SpeedPickerDialog extends StatefulWidget {
+  final int photoCount;
+  const _SpeedPickerDialog({required this.photoCount});
+
+  @override
+  State<_SpeedPickerDialog> createState() => _SpeedPickerDialogState();
+}
+
+class _SpeedPickerDialogState extends State<_SpeedPickerDialog> {
+  double _fps = 8;
+
+  @override
+  Widget build(BuildContext context) {
+    final fps = _fps.round();
+    final perFrame = 1 / fps; // seconds each photo is shown
+    final totalSecs = widget.photoCount / fps;
+
+    return AlertDialog(
+      backgroundColor: AppColors.paper,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      title: Text('Timelapse speed', style: AppText.serifBody(size: 18)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$fps frames per second',
+            style: AppText.ui(size: 14, weight: FontWeight.w600),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${perFrame.toStringAsFixed(2)}s per photo  ·  ~${totalSecs.toStringAsFixed(1)}s total',
+            style: AppText.ui(size: 12, color: AppColors.inkMuted),
+          ),
+          const SizedBox(height: 8),
+          Slider(
+            value: _fps,
+            min: 2,
+            max: 12,
+            divisions: 10,
+            activeColor: AppColors.accent,
+            label: '$fps fps',
+            onChanged: (v) => setState(() => _fps = v),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Slower',
+                  style: AppText.ui(size: 11, color: AppColors.inkMuted)),
+              Text('Faster',
+                  style: AppText.ui(size: 11, color: AppColors.inkMuted)),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel',
+              style: AppText.ui(size: 14, color: AppColors.inkMuted)),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, _fps.round()),
+          child: Text('Generate',
+              style: AppText.ui(
+                  size: 14, weight: FontWeight.w600, color: AppColors.accent)),
+        ),
+      ],
     );
   }
 }
