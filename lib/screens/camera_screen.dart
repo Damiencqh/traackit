@@ -140,7 +140,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
 
       await ref
           .read(projectsProvider.notifier)
-          .addPhotoToProject(widget.project.id, photo);
+          .addOrReplaceTodayPhoto(widget.project.id, photo);
 
       if (!mounted) return;
       Navigator.of(context).pop(true);
@@ -202,12 +202,12 @@ class _CameraScreenState extends ConsumerState<CameraScreen> {
               ),
 
               // Ghost of yesterday — last photo at low opacity, for alignment.
-              if (widget.project.latestPhoto != null)
+              if (widget.project.ghostPhoto != null)
                 Positioned.fill(
                   child: IgnorePointer(
                     child: FutureBuilder<String>(
                       future: ref.read(storageServiceProvider).resolvePhotoPath(
-                          widget.project.latestPhoto!.filePath),
+                          widget.project.ghostPhoto!.filePath),
                       builder: (context, ghostSnap) {
                         if (!ghostSnap.hasData) {
                           return const SizedBox.shrink();

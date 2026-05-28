@@ -120,6 +120,36 @@ class ProjectsNotifier extends AsyncNotifier<List<Project>> {
     state = AsyncData(updated);
   }
 
+  /// Adds today's photo, replacing any existing photo from today.
+  /// Used by the camera for both first capture and retake — guarantees
+  /// exactly one photo per day, and deletes the replaced file from disk.
+  Future<void> addOrReplaceTodayPhoto(String projectId, Photo photo) async {
+    final current = state.value ?? [];
+    final now = DateTime.now();
+    bool isToday(Photo p) =>
+        p.capturedAt.year == now.year &&
+        p.capturedAt.month == now.month &&
+        p.capturedAt.day == now.day;
+
+    final storage = ref.read(storageServiceProvider);
+    final updated = <Project>[];
+    for (final pr in current) {
+      if (pr.id == projectId) {
+        for (final old in pr.photos.where(isToday)) {
+          try {
+            await storage.deletePhotoFile(old.filePath);
+          } catch (_) {}
+        }
+        final kept = pr.photos.where((p) => !isToday(p)).toList();
+        updated.add(pr.copyWith(photos: [...kept, photo]));
+      } else {
+        updated.add(pr);
+      }
+    }
+    await storage.saveProjects(updated);
+    state = AsyncData(updated);
+  }
+
   Future<void> deleteProject(String id) async {
     final current = state.value ?? [];
     final project = current.firstWhere(

@@ -30,6 +30,33 @@ class Project {
         p.capturedAt.day == now.day);
   }
 
+  /// Today's photo, or null if none captured today.
+  Photo? get todayPhoto {
+    final now = DateTime.now();
+    for (final p in photos) {
+      if (p.capturedAt.year == now.year &&
+          p.capturedAt.month == now.month &&
+          p.capturedAt.day == now.day) {
+        return p;
+      }
+    }
+    return null;
+  }
+
+  /// The most recent photo captured *before* today, or null if none.
+  /// This is the camera "ghost" target — so retaking today's photo still
+  /// aligns against the previous day, not the shot being replaced.
+  Photo? get ghostPhoto {
+    final now = DateTime.now();
+    bool isToday(Photo p) =>
+        p.capturedAt.year == now.year &&
+        p.capturedAt.month == now.month &&
+        p.capturedAt.day == now.day;
+    final prior = photos.where((p) => !isToday(p)).toList()
+      ..sort((a, b) => a.capturedAt.compareTo(b.capturedAt));
+    return prior.isEmpty ? null : prior.last;
+  }
+
   /// The most recently captured photo, or null if none exist yet.
   /// Used by the camera screen to render the "ghost of yesterday" overlay.
   Photo? get latestPhoto {

@@ -12,7 +12,7 @@ import '../state/app_state.dart';
 import 'camera_screen.dart';
 
 /// View a single project: big day counter + grid of photos so far,
-/// plus the timelapse export button.
+/// plus the timelapse export button. Tapping today's photo offers a retake.
 class ProjectDetailScreen extends ConsumerWidget {
   final String projectId;
   const ProjectDetailScreen({super.key, required this.projectId});
@@ -28,6 +28,8 @@ class ProjectDetailScreen extends ConsumerWidget {
         body: Center(child: Text('Project not found.')),
       );
     }
+
+    final todayPhoto = project.todayPhoto;
 
     return Scaffold(
       appBar: AppBar(),
@@ -91,7 +93,10 @@ class ProjectDetailScreen extends ConsumerWidget {
                       );
                     }
                     final photo = project.photos[i];
-                    return FutureBuilder<String>(
+                    final isToday =
+                        todayPhoto != null && photo.id == todayPhoto.id;
+
+                    Widget tile = FutureBuilder<String>(
                       future: storage.resolvePhotoPath(photo.filePath),
                       builder: (context, snap) {
                         if (!snap.hasData) {
@@ -108,6 +113,35 @@ class ProjectDetailScreen extends ConsumerWidget {
                         );
                       },
                     );
+
+                    if (isToday) {
+                      tile = GestureDetector(
+                        onTap: () => _confirmRetake(context, project),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            tile,
+                            Positioned(
+                              right: 4,
+                              bottom: 4,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.45),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.refresh,
+                                  size: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return tile;
                   },
                 ),
               ),
@@ -141,6 +175,43 @@ class ProjectDetailScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _confirmRetake(BuildContext context, Project project) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.paper,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title:
+            Text("Retake today's photo?", style: AppText.serifBody(size: 18)),
+        content: Text(
+          'This replaces the photo you took today. Your previous days stay untouched.',
+          style: AppText.ui(size: 14, color: AppColors.inkMuted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel',
+                style: AppText.ui(size: 14, color: AppColors.inkMuted)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('Retake',
+                style: AppText.ui(
+                    size: 14,
+                    weight: FontWeight.w600,
+                    color: AppColors.accent)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => CameraScreen(project: project)),
     );
   }
 
