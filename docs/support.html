@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traackit — Concept Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Geist:wght@300..700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #F4F0E8;
+  --paper-warm: #ECE6D8;
+  --card: #FFFFFF;
+  --ink: #1C1A17;
+  --ink-muted: #6E6862;
+  --ink-soft: #A8A29A;
+  --accent: #4F6B3F;
+  --accent-soft: #7C8E6A;
+  --line: #D9D2C2;
+  --line-soft: #E8E2D5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Geist', system-ui, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(79,107,63,0.04) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(124,142,106,0.05) 0%, transparent 40%);
+  background-attachment: fixed;
+}
+.page {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 72px 40px 120px;
+}
+
+/* Hero */
+.hero {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 56px;
+  margin-bottom: 64px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 60px;
+  align-items: end;
+}
+.hero-mark {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(72px, 10vw, 156px);
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+}
+.hero-mark .dot { color: var(--accent); font-style: normal; }
+.hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 12px;
+}
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+}
+.lede {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-size: 22px;
+  line-height: 1.42;
+  color: var(--ink);
+  max-width: 460px;
+}
+.lede em { color: var(--accent); font-style: italic; }
+
+/* Notes row */
+.notes-row {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+}
+.note h3 {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+.note p {
+  font-size: 13.5px;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+/* Section title */
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(36px, 4.5vw, 52px);
+  margin: 110px 0 48px;
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: baseline;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.section-title-num {
+  font-size: 12px;
+  font-style: normal;
+  font-family: 'Geist', system-ui, sans-serif;
+  letter-spacing: 0.18em;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Screen grid */
+.screens {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 72px 32px;
+}
+.screen-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+.screen-label {
+  text-align: center;
+  width: 100%;
+}
+.screen-label-no {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--accent);
+  display: block;
+  line-height: 1;
+}
+.screen-label-name {
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.screen-label-desc {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--ink-muted);
+  max-width: 260px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.55;
+}
+
+/* Phone frame */
+.phone {
+  width: 320px;
+  height: 668px;
+  background: linear-gradient(180deg, #1f1f1f 0%, #0e0e0e 100%);
+  border-radius: 50px;
+  padding: 11px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.06),
+    0 1px 2px rgba(0,0,0,0.04),
+    0 30px 60px -22px rgba(28, 26, 23, 0.22),
+    0 18px 36px -18px rgba(28, 26, 23, 0.14);
+  position: relative;
+}
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  background: var(--paper);
+  border-radius: 39px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.dynamic-island {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 28px;
+  background: #000;
+  border-radius: 100px;
+  z-index: 10;
+}
+
+/* Status bar */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 28px 0;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Geist', system-ui, sans-serif;
+  position: relative;
+  z-index: 5;
+  height: 40px;
+}
+.status-icons {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+/* Screen body */
+.screen-body {
+  flex: 1;
+  padding: 4px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Home screen */
+.greeting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 18px;
+}
+.greeting {
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: 32px;
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+}
+.greeting-date {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 8px;
+  letter-spacing: 0.01em;
+}
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  background: rgba(255,255,255,0.6);
+  border: 1px solid var(--line-soft);
+}
+
+.section-tab {
+  margin-top: 30px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-tab::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.project-list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.project-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--line-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  transition: transform 0.15s ease;
+}
+.project-card:hover { transform: translateY(-1px); }
+.project-info { flex: 1; min-width: 0; }
+.project-name {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 16.5px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.project-days {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
+}
+.project-action {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 8px 13px;
+  border: 1px solid var(--accent);
+  border-radius: 100px;
+  white-space: nowrap;
+}
+.project-status {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 3px rgba(124,142,106,0.18);
+}
+
+.fab {
+  position: absolute;
+  bottom: 26px;
+  right: 26px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 300;
+  font-family: 'Fraunces', serif;
+  box-shadow:
+    0 10px 24px -8px rgba(28,26,23,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  z-index: 6;
+}
+
+/* Project detail screen */
+.detail-header {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.back-arrow {
+  font-size: 20px;
+  color: var(--ink);
+  width: 32px;
+  display: flex;
+  align-items: center;
+}
+.detail-title-block { display: flex; flex-direction: column; }
+.detail-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.detail-sub {
+  font-size: 11.5px;
+  color: var(--ink-muted);
+  margin-top: 5px;
+  letter-spacing: 0.02em;
+}
+.days-hero {
+  text-align: center;
+  margin-top: 26px;
+  padding: 24px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+.days-hero-num {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 80px;
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+}
+.days-hero-label {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-top: 10px;
+  font-weight: 500;
+}
+.photo-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+.photo-thumb {
+  aspect-ratio: 1;
+  background: var(--paper-warm);
+  border-radius: 6px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.photo-thumb.today {
+  background: transparent;
+  border: 1.5px dashed var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 22px;
+  font-family: 'Fraunces', serif;
+  font-weight: 300;
+}
+.detail-bottom {
+  margin-top: auto;
+  padding-top: 18px;
+}
+.timelapse-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 100px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Template picker */
+.template-eyebrow {
+  margin-top: 14px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+.template-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 38px;
+  margin-top: 8px;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+.template-sub {
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+.template-grid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.template-tile {
+  aspect-ratio: 1;
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+.template-tile.selected {
+  border-color: var(--accent);
+  background: rgba(79,107,63,0.07);
+  box-shadow: 0 0 0 3px rgba(79,107,63,0.08);
+}
+.template-tile svg { color: var(--ink-soft); }
+.template-tile.selected svg { color: var(--accent); }
+.template-label {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink);
+}
+.template-input-wrap {
+  margin-top: 14px;
+  position: relative;
+}
+.template-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 15px;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+}
+.template-input-label {
+  position: absolute;
+  top: -7px;
+  left: 12px;
+  background: var(--paper);
+  padding: 0 6px;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+/* Camera screen */
+.camera-screen {
+  background: #0F0E0C;
+  color: #fff;
+}
+.camera-screen .status-bar { color: #fff; }
+.camera-view {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.camera-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(124,142,106,0.18) 0%, transparent 50%),
+    linear-gradient(170deg, #2c2b25 0%, #181612 100%);
+}
+.camera-bg::after {
+  /* subtle grain */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+.camera-overlay-text {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  font-weight: 500;
+}
+.camera-day-badge {
+  position: absolute;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: rgba(255,255,255,0.85);
+}
+.camera-silhouette {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -48%);
+  width: 70%;
+  opacity: 0.9;
+}
+.camera-controls {
+  position: absolute;
+  bottom: 38px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+.shutter {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid transparent;
+  box-shadow: 0 0 0 2px #fff, inset 0 0 0 4px #0F0E0C;
+}
+.cam-aux {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+}
+
+/* Settings */
+.settings-title {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 36px;
+  margin-top: 14px;
+  letter-spacing: -0.03em;
+}
+.settings-group { margin-top: 26px; }
+.settings-group-label {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+.settings-card {
+  background: var(--card);
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+}
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label {
+  font-size: 14px;
+  color: var(--ink);
+}
+.settings-row-val {
+  font-size: 13px;
+  color: var(--ink-muted);
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+}
+.toggle {
+  width: 38px;
+  height: 22px;
+  background: var(--accent);
+  border-radius: 100px;
+  position: relative;
+  transition: background 0.2s ease;
+}
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+.toggle.off { background: var(--line); }
+.toggle.off::after { right: auto; left: 2px; }
+
+/* Marker pull-quote between sections */
+.pull-quote {
+  margin: 110px auto;
+  max-width: 820px;
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(28px, 3.4vw, 42px);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.pull-quote::before, .pull-quote::after {
+  content: '—';
+  display: block;
+  color: var(--accent);
+  font-style: normal;
+  font-size: 22px;
+  margin: 16px 0;
+}
+
+/* Support section */
+.support {
+  margin-top: 40px;
+  padding: 56px 40px 40px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.support-lede {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 22px;
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: 520px;
+  margin: 0 auto 32px;
+  letter-spacing: -0.01em;
+}
+.support-email {
+  display: inline-block;
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--accent-soft);
+  transition: border-color 0.2s ease;
+  letter-spacing: 0.01em;
+}
+.support-email:hover {
+  border-bottom-color: var(--accent);
+}
+
+/* Footer */
+.footer {
+  margin-top: 120px;
+  padding-top: 48px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+.footer-mark {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 28px;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+.footer-mark .dot { color: var(--accent); font-style: normal; }
+
+@media (max-width: 1100px) {
+  .screens { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 760px) {
+  .page { padding: 48px 24px 80px; }
+  .screens { grid-template-columns: 1fr; }
+  .hero { grid-template-columns: 1fr; gap: 24px; }
+  .notes-row { grid-template-columns: 1fr; gap: 28px; }
+  .support { padding: 40px 16px 24px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div>
+      <div class="eyebrow">iOS · Concept · 2026</div>
+      <h1 class="hero-mark">Traackit<span class="dot">.</span></h1>
+    </div>
+    <div class="hero-meta">
+      <p class="lede">Quiet daily photos that become a story. One tap a day; a <em>timelapse</em> at the end. No streaks, no social, no clutter — just the slow proof that something is changing.</p>
+    </div>
+  </header>
+
+  <div class="notes-row">
+    <div class="note">
+      <h3>One screen, one job</h3>
+      <p>The home is a list — your traacks, the days behind them, and whether today is done. Everything else hides until needed.</p>
+    </div>
+    <div class="note">
+      <h3>Align, don't aim</h3>
+      <p>A faint silhouette over the camera holds your framing steady across weeks. Face, torso, plant, or a shape you draw yourself.</p>
+    </div>
+    <div class="note">
+      <h3>Soft reminders</h3>
+      <p>One push at the time you choose. Skip a day without guilt — there are no streaks to break, just a record that keeps building.</p>
+    </div>
+  </div>
+
+  <!-- SCREENS -->
+  <h2 class="section-title"><span class="section-title-num">01 / Screens</span> The shape of the app</h2>
+
+  <div class="screens">
+
+    <!-- SCREEN 1: HOME -->
+    <div class="screen-card">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-icons">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4" rx="0.5"/><rect x="4" y="4" width="3" height="6" rx="0.5"/><rect x="8" y="2" width="3" height="8" rx="0.5"/><rect x="12" y="0" width="3" height="10" rx="0.5"/></svg>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M7 9.5L8.5 8a2 2 0 0 0-3 0L7 9.5z"/><path d="M3.5 6a4.95 4.95 0 0 1 7 0l-1 1a3.55 3.55 0 0 0-5 0l-1-1z"/><path d="M1 3.5a8.5 8.5 0 0 1 12 0l-1 1a7.1 7.1 0 0 0-10 0l-1-1z"/></svg>
+              <svg width="24" height="10" viewBox="0 0 24 10" fill="none"><rect x="0.5" y="0.5" width="20" height="9" rx="2" stroke="currentColor"/><rect x="2" y="2" width="16" height="6" rx="1" fill="currentColor"/><rect x="21" y="3" width="1.5" height="4" rx="0.5" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="screen-body">
+            <div class="greeting-row">
+              <div>
+                <div class="greeting">Hi, Sarah.</div>
+                <div class="greeting-date">Wednesday · 20 May</div>
+              </div>
+              <div class="icon-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              </div>
+            </div>
+
+            <div class="section-tab">Traack Box</div>
+
+            <div class="project-list">
+              <div class="project-card">
+                <div class="project-info">
+                  <div class="project-name">My Weight Loss<br>Challenge</div>
+                  <div class="project-days">45 days in</div>
+                </div>
+                <div class="project-action">Add progress</div>
+              </div>
+              <div class="project-card">
+                <div class="project-info">
+                  <div class="project-name">My Strawberry Plant</div>
+                  <div class="project-days">99 days in</div>
+                </div>
+                <div class="project-status"><span class="status-dot"></span>Updated</div>
+              </div>
+              <div class="project-card">
+                <div class="project-info">
+                  <div class="project-name">Beard Growth</div>
+                  <div class="project-days">12 days in</div>
+                </div>
+                <div class="project-action">Add progress</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fab">+</div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="screen-label-no">i.</span>
+        <span class="screen-label-name">Home</span>
+        <span class="screen-label-desc">All projects at a glance. Days in, and what's left to do today.</span>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: PROJECT DETAIL -->
+    <div class="screen-card">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-icons">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4" rx="0.5"/><rect x="4" y="4" width="3" height="6" rx="0.5"/><rect x="8" y="2" width="3" height="8" rx="0.5"/><rect x="12" y="0" width="3" height="10" rx="0.5"/></svg>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M7 9.5L8.5 8a2 2 0 0 0-3 0L7 9.5z"/><path d="M3.5 6a4.95 4.95 0 0 1 7 0l-1 1a3.55 3.55 0 0 0-5 0l-1-1z"/><path d="M1 3.5a8.5 8.5 0 0 1 12 0l-1 1a7.1 7.1 0 0 0-10 0l-1-1z"/></svg>
+              <svg width="24" height="10" viewBox="0 0 24 10" fill="none"><rect x="0.5" y="0.5" width="20" height="9" rx="2" stroke="currentColor"/><rect x="2" y="2" width="16" height="6" rx="1" fill="currentColor"/><rect x="21" y="3" width="1.5" height="4" rx="0.5" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="screen-body">
+            <div class="detail-header">
+              <div class="back-arrow">←</div>
+              <div class="detail-title-block">
+                <div class="detail-title">Strawberry Plant</div>
+                <div class="detail-sub">started 11 February</div>
+              </div>
+            </div>
+
+            <div class="days-hero">
+              <div class="days-hero-num">99</div>
+              <div class="days-hero-label">days tracked</div>
+            </div>
+
+            <div class="photo-grid">
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#3a4a2a,#5e7440)"></div>
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#465734,#6a8244)"></div>
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#52653c,#78924c)"></div>
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#5e7440,#86a258)"></div>
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#688048,#92ae60)"></div>
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#728a50,#9eba68)"></div>
+              <div class="photo-thumb" style="background:linear-gradient(135deg,#7a9258,#a8c470)"></div>
+              <div class="photo-thumb today">+</div>
+            </div>
+
+            <div class="detail-bottom">
+              <div class="timelapse-btn">Generate timelapse</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="screen-label-no">ii.</span>
+        <span class="screen-label-name">Project</span>
+        <span class="screen-label-desc">The arc of one track. Every photo, ready to weave together.</span>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: NEW TRAACK / TEMPLATE PICKER -->
+    <div class="screen-card">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-icons">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4" rx="0.5"/><rect x="4" y="4" width="3" height="6" rx="0.5"/><rect x="8" y="2" width="3" height="8" rx="0.5"/><rect x="12" y="0" width="3" height="10" rx="0.5"/></svg>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M7 9.5L8.5 8a2 2 0 0 0-3 0L7 9.5z"/><path d="M3.5 6a4.95 4.95 0 0 1 7 0l-1 1a3.55 3.55 0 0 0-5 0l-1-1z"/><path d="M1 3.5a8.5 8.5 0 0 1 12 0l-1 1a7.1 7.1 0 0 0-10 0l-1-1z"/></svg>
+              <svg width="24" height="10" viewBox="0 0 24 10" fill="none"><rect x="0.5" y="0.5" width="20" height="9" rx="2" stroke="currentColor"/><rect x="2" y="2" width="16" height="6" rx="1" fill="currentColor"/><rect x="21" y="3" width="1.5" height="4" rx="0.5" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="screen-body">
+            <div class="detail-header">
+              <div class="back-arrow">←</div>
+            </div>
+            <div class="template-eyebrow">Step 1 of 2 · Template</div>
+            <div class="template-title">A new<br>traack.</div>
+            <div class="template-sub">Pick a shape to align with.</div>
+
+            <div class="template-grid">
+              <div class="template-tile selected">
+                <svg width="44" height="56" viewBox="0 0 44 56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><ellipse cx="22" cy="22" rx="14" ry="18"/><path d="M8 50 Q22 38 36 50"/></svg>
+                <span class="template-label">Face</span>
+              </div>
+              <div class="template-tile">
+                <svg width="50" height="56" viewBox="0 0 50 56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="25" cy="12" r="7"/><path d="M10 54 Q10 28 25 24 Q40 28 40 54"/></svg>
+                <span class="template-label">Torso</span>
+              </div>
+              <div class="template-tile">
+                <svg width="50" height="56" viewBox="0 0 50 56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 28 Q14 14 22 8 Q30 14 30 28"/><path d="M22 30 V52"/><path d="M10 36 Q22 30 34 36"/><path d="M12 52 L34 52 L36 44 L8 44 Z"/></svg>
+                <span class="template-label">Plant</span>
+              </div>
+              <div class="template-tile">
+                <svg width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" stroke-linecap="round"><rect x="8" y="8" width="34" height="34" rx="3"/></svg>
+                <span class="template-label">Custom</span>
+              </div>
+            </div>
+
+            <div class="template-input-wrap">
+              <span class="template-input-label">Name</span>
+              <input class="template-input" value="My new strawberry plant" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="screen-label-no">iii.</span>
+        <span class="screen-label-name">New Traack</span>
+        <span class="screen-label-desc">Templates give your photos a steady frame from day one.</span>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: CAMERA -->
+    <div class="screen-card">
+      <div class="phone">
+        <div class="phone-screen camera-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-icons">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4" rx="0.5"/><rect x="4" y="4" width="3" height="6" rx="0.5"/><rect x="8" y="2" width="3" height="8" rx="0.5"/><rect x="12" y="0" width="3" height="10" rx="0.5"/></svg>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M7 9.5L8.5 8a2 2 0 0 0-3 0L7 9.5z"/><path d="M3.5 6a4.95 4.95 0 0 1 7 0l-1 1a3.55 3.55 0 0 0-5 0l-1-1z"/><path d="M1 3.5a8.5 8.5 0 0 1 12 0l-1 1a7.1 7.1 0 0 0-10 0l-1-1z"/></svg>
+              <svg width="24" height="10" viewBox="0 0 24 10" fill="none"><rect x="0.5" y="0.5" width="20" height="9" rx="2" stroke="currentColor"/><rect x="2" y="2" width="16" height="6" rx="1" fill="currentColor"/><rect x="21" y="3" width="1.5" height="4" rx="0.5" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="camera-view">
+            <div class="camera-bg"></div>
+            <div class="camera-overlay-text">Align with the outline</div>
+            <div class="camera-day-badge">Day 46</div>
+            <svg class="camera-silhouette" viewBox="0 0 100 130" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="0.8" stroke-dasharray="2 2.5" stroke-linecap="round">
+              <ellipse cx="50" cy="48" rx="28" ry="38"/>
+              <path d="M18 122 Q50 92 82 122"/>
+            </svg>
+            <div class="camera-controls">
+              <div class="cam-aux">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+              </div>
+              <div class="shutter"></div>
+              <div class="cam-aux">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.5"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="screen-label-no">iv.</span>
+        <span class="screen-label-name">Capture</span>
+        <span class="screen-label-desc">A faint silhouette keeps your framing identical across weeks.</span>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: SETTINGS -->
+    <div class="screen-card">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-icons">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4" rx="0.5"/><rect x="4" y="4" width="3" height="6" rx="0.5"/><rect x="8" y="2" width="3" height="8" rx="0.5"/><rect x="12" y="0" width="3" height="10" rx="0.5"/></svg>
+              <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor"><path d="M7 9.5L8.5 8a2 2 0 0 0-3 0L7 9.5z"/><path d="M3.5 6a4.95 4.95 0 0 1 7 0l-1 1a3.55 3.55 0 0 0-5 0l-1-1z"/><path d="M1 3.5a8.5 8.5 0 0 1 12 0l-1 1a7.1 7.1 0 0 0-10 0l-1-1z"/></svg>
+              <svg width="24" height="10" viewBox="0 0 24 10" fill="none"><rect x="0.5" y="0.5" width="20" height="9" rx="2" stroke="currentColor"/><rect x="2" y="2" width="16" height="6" rx="1" fill="currentColor"/><rect x="21" y="3" width="1.5" height="4" rx="0.5" fill="currentColor"/></svg>
+            </div>
+          </div>
+
+          <div class="screen-body">
+            <div class="detail-header">
+              <div class="back-arrow">←</div>
+            </div>
+            <div class="settings-title">Settings.</div>
+
+            <div class="settings-group">
+              <div class="settings-group-label">You</div>
+              <div class="settings-card">
+                <div class="settings-row">
+                  <span class="settings-row-label">Name</span>
+                  <span class="settings-row-val">Sarah</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-group-label">Privacy</div>
+              <div class="settings-card">
+                <div class="settings-row">
+                  <span class="settings-row-label">Password lock</span>
+                  <div class="toggle"></div>
+                </div>
+                <div class="settings-row">
+                  <span class="settings-row-label">Face ID</span>
+                  <div class="toggle off"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-group-label">Reminders</div>
+              <div class="settings-card">
+                <div class="settings-row">
+                  <span class="settings-row-label">Daily reminder</span>
+                  <span class="settings-row-val">10:00</span>
+                </div>
+                <div class="settings-row">
+                  <span class="settings-row-label">Days</span>
+                  <span class="settings-row-val">Every day</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="screen-label">
+        <span class="screen-label-no">v.</span>
+        <span class="screen-label-name">Settings</span>
+        <span class="screen-label-desc">A short list. Lock the app, set a reminder — that's the lot.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PULL QUOTE -->
+  <p class="pull-quote">A track is finished not when something has changed, but when you turn around and realise it has.</p>
+
+  <!-- SUPPORT -->
+  <h2 class="section-title"><span class="section-title-num">02 / Support</span> Get in touch</h2>
+
+  <div class="support">
+    <p class="support-lede">Questions, bug reports, feature ideas — I'd genuinely like to hear them.</p>
+    <a class="support-email" href="mailto:support.traackit@gmail.com">support.traackit@gmail.com</a>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div>
+      <div class="footer-mark">Traackit<span class="dot">.</span></div>
+      <div style="margin-top:10px;">A quiet way to watch things change.</div>
+    </div>
+    <div style="text-align: right;">
+      <div>v0.1 — concept</div>
+      <div style="margin-top:4px;">Not yet on the App Store</div>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
