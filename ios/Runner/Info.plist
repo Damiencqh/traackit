@@ -76,5 +76,8 @@
 <key>NSUserNotificationsUsageDescription</key>
 	<string>Traackit sends a gentle daily reminder to capture today's photo.</string>
 
+<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	
 </dict>
 </plist>
