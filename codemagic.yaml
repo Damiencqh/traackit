@@ -42,10 +42,7 @@ workflows:
 
       - name: Flutter build (archive only)
         script: |
-          flutter build ios --release \
-            --build-name=0.1.0 \
-            --build-number=$(($BUILD_NUMBER + 1)) \
-            --no-codesign
+          flutter build ios --release
 
       - name: Archive with xcodebuild
         script: |
