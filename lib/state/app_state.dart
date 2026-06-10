@@ -183,6 +183,32 @@ class ProjectsNotifier extends AsyncNotifier<List<Project>> {
     state = AsyncData(updated);
   }
 
+  /// Permanently removes a single photo from a project.
+  /// Deletes the JPEG from disk as well. No undo.
+  Future<void> removePhoto(String projectId, String photoId) async {
+    final current = state.value ?? [];
+    final storage = ref.read(storageServiceProvider);
+    final updated = <Project>[];
+    for (final pr in current) {
+      if (pr.id == projectId) {
+        // Find the file to delete from disk.
+        final target = pr.photos.where((p) => p.id == photoId);
+        if (target.isNotEmpty) {
+          try {
+            await storage.deletePhotoFile(target.first.filePath);
+          } catch (_) {}
+        }
+        updated.add(pr.copyWith(
+          photos: pr.photos.where((p) => p.id != photoId).toList(),
+        ));
+      } else {
+        updated.add(pr);
+      }
+    }
+    await storage.saveProjects(updated);
+    state = AsyncData(updated);
+  }
+
   Future<void> deleteProject(String id) async {
     final current = state.value ?? [];
     final project = current.firstWhere(

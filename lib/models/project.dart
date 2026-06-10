@@ -18,9 +18,6 @@ class Project {
     this.photos = const [],
   });
 
-  /// Days since the project was started (1-based; day 1 is the start day).
-  int get daysIn => DateTime.now().difference(createdAt).inDays + 1;
-
   /// Whether the user has already captured a photo today.
   bool get hasPhotoToday {
     final now = DateTime.now();
@@ -28,6 +25,72 @@ class Project {
         p.capturedAt.year == now.year &&
         p.capturedAt.month == now.month &&
         p.capturedAt.day == now.day);
+  }
+
+  /// Number of distinct days you've captured a photo for this project.
+  /// Equal to `photos.length` because the upsert-today logic guarantees
+  /// at most one photo per calendar day.
+  int get daysIn {
+    final unique = <String>{};
+    for (final p in photos) {
+      unique.add(
+          '${p.capturedAt.year}-${p.capturedAt.month}-${p.capturedAt.day}');
+    }
+    return unique.length;
+  }
+
+  /// Date of the oldest photo, or null if none captured yet.
+  DateTime? get firstPhotoDate {
+    if (photos.isEmpty) return null;
+    final sorted = [...photos]
+      ..sort((a, b) => a.capturedAt.compareTo(b.capturedAt));
+    return sorted.first.capturedAt;
+  }
+
+  /// Date of the most recent photo, or null if none captured yet.
+  DateTime? get latestPhotoDate {
+    if (photos.isEmpty) return null;
+    final sorted = [...photos]
+      ..sort((a, b) => a.capturedAt.compareTo(b.capturedAt));
+    return sorted.last.capturedAt;
+  }
+
+  /// Inclusive day count from first to latest photo.
+  int get calendarSpan {
+    if (photos.isEmpty) return 0;
+    final first = firstPhotoDate!;
+    final last = latestPhotoDate!;
+    final firstDay = DateTime(first.year, first.month, first.day);
+    final lastDay = DateTime(last.year, last.month, last.day);
+    return lastDay.difference(firstDay).inDays + 1;
+  }
+
+  /// Consecutive days of capture ending today (or yesterday if no photo today).
+  int get currentStreak {
+    if (photos.isEmpty) return 0;
+    final dates = <DateTime>{
+      for (final p in photos)
+        DateTime(p.capturedAt.year, p.capturedAt.month, p.capturedAt.day),
+    };
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    DateTime cursor;
+    if (dates.contains(today)) {
+      cursor = today;
+    } else if (dates.contains(yesterday)) {
+      cursor = yesterday;
+    } else {
+      return 0;
+    }
+
+    var streak = 0;
+    while (dates.contains(cursor)) {
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    return streak;
   }
 
   /// Today's photo, or null if none captured today.

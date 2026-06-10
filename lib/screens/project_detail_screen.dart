@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
-
+import '../models/template.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text.dart';
+import '../models/photo.dart';
 import '../models/project.dart';
 import '../state/app_state.dart';
 import 'camera_screen.dart';
+import 'photo_viewer_screen.dart';
 
-/// View a single project: big day counter + grid of photos so far,
-/// plus the timelapse export button. Tapping today's photo offers a retake.
 class ProjectDetailScreen extends ConsumerWidget {
   final String projectId;
   const ProjectDetailScreen({super.key, required this.projectId});
@@ -24,15 +24,24 @@ class ProjectDetailScreen extends ConsumerWidget {
     final storage = ref.read(storageServiceProvider);
 
     if (project == null) {
-      return const Scaffold(
-        body: Center(child: Text('Project not found.')),
-      );
+      return const Scaffold(body: Center(child: Text('Project not found.')));
     }
 
     final todayPhoto = project.todayPhoto;
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            tooltip: 'Project details',
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => _ProjectInfoDialog(project: project),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
@@ -57,15 +66,9 @@ class ProjectDetailScreen extends ConsumerWidget {
                 width: double.infinity,
                 child: Column(
                   children: [
-                    Text(
-                      '${project.daysIn}',
-                      style: AppText.display(size: 80),
-                    ),
+                    Text('${project.daysIn}', style: AppText.display(size: 80)),
                     const SizedBox(height: 8),
-                    Text(
-                      'DAYS TRACKED',
-                      style: AppText.eyebrow(size: 10),
-                    ),
+                    Text('DAYS TRACKED', style: AppText.eyebrow(size: 10)),
                   ],
                 ),
               ),
@@ -96,6 +99,7 @@ class ProjectDetailScreen extends ConsumerWidget {
                     final isToday =
                         todayPhoto != null && photo.id == todayPhoto.id;
 
+                    // Base image tile.
                     Widget tile = FutureBuilder<String>(
                       future: storage.resolvePhotoPath(photo.filePath),
                       builder: (context, snap) {
@@ -114,34 +118,41 @@ class ProjectDetailScreen extends ConsumerWidget {
                       },
                     );
 
+                    // Stack the retake badge on top for today's tile.
                     if (isToday) {
-                      tile = GestureDetector(
-                        onTap: () => _confirmRetake(context, project),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            tile,
-                            Positioned(
-                              right: 4,
-                              bottom: 4,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.45),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.refresh,
-                                  size: 12,
-                                  color: Colors.white,
-                                ),
+                      tile = Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          tile,
+                          Positioned(
+                            right: 4,
+                            bottom: 4,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.45),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.refresh,
+                                size: 12,
+                                color: Colors.white,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       );
                     }
-                    return tile;
+
+                    // All tiles: long-press opens the viewer.
+                    // Today's tile additionally taps to retake.
+                    return GestureDetector(
+                      onTap: isToday
+                          ? () => _confirmRetake(context, project)
+                          : null,
+                      onLongPress: () => _openViewer(context, project, photo),
+                      child: tile,
+                    );
                   },
                 ),
               ),
@@ -174,6 +185,15 @@ class ProjectDetailScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _openViewer(BuildContext context, Project project, Photo photo) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PhotoViewerScreen(project: project, photo: photo),
       ),
     );
   }
@@ -220,16 +240,13 @@ class ProjectDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     Project project,
   ) async {
-    // Let the user choose playback speed first.
     final fps = await showDialog<int>(
       context: context,
       builder: (_) => _SpeedPickerDialog(photoCount: project.photos.length),
     );
-    if (fps == null) return; // cancelled
+    if (fps == null) return;
     if (!context.mounted) return;
 
-    // Capture the render box now to anchor the iOS share sheet.
-    // iOS 26 throws if sharePositionOrigin is a zero rect.
     final box = context.findRenderObject() as RenderBox?;
 
     showDialog(
@@ -243,7 +260,7 @@ class ProjectDetailScreen extends ConsumerWidget {
           await ref.read(timelapseServiceProvider).generate(project, fps: fps);
 
       if (!context.mounted) return;
-      Navigator.pop(context); // close the progress dialog
+      Navigator.pop(context);
 
       await SharePlus.instance.share(
         ShareParams(
@@ -341,7 +358,7 @@ class _SpeedPickerDialogState extends State<_SpeedPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final fps = _fps.round();
-    final perFrame = 1 / fps; // seconds each photo is shown
+    final perFrame = 1 / fps;
     final totalSecs = widget.photoCount / fps;
 
     return AlertDialog(
@@ -395,6 +412,108 @@ class _SpeedPickerDialogState extends State<_SpeedPickerDialog> {
                   size: 14, weight: FontWeight.w600, color: AppColors.accent)),
         ),
       ],
+    );
+  }
+}
+
+class _ProjectInfoDialog extends StatelessWidget {
+  final Project project;
+  const _ProjectInfoDialog({required this.project});
+
+  @override
+  Widget build(BuildContext context) {
+    final df = DateFormat('d MMM yyyy');
+
+    return Dialog(
+      backgroundColor: AppColors.paper,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(project.name, style: AppText.serifBody(size: 20)),
+            const SizedBox(height: 4),
+            Text('Project details',
+                style: AppText.ui(size: 12, color: AppColors.inkMuted)),
+            const SizedBox(height: 18),
+            _InfoRow(label: 'Started', value: df.format(project.createdAt)),
+            if (project.firstPhotoDate != null)
+              _InfoRow(
+                  label: 'First photo',
+                  value: df.format(project.firstPhotoDate!)),
+            if (project.latestPhotoDate != null)
+              _InfoRow(
+                  label: 'Latest photo',
+                  value: df.format(project.latestPhotoDate!)),
+            _InfoRow(label: 'Photos taken', value: '${project.photos.length}'),
+            if (project.photos.length >= 2)
+              _InfoRow(
+                  label: 'Calendar span',
+                  value: '${project.calendarSpan} days'),
+            if (project.currentStreak > 0)
+              _InfoRow(
+                  label: 'Current streak',
+                  value:
+                      '${project.currentStreak} day${project.currentStreak == 1 ? "" : "s"}'),
+            _InfoRow(label: 'Template', value: _templateName(project.template)),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'CLOSE',
+                  style: AppText.ui(
+                    size: 12,
+                    weight: FontWeight.w600,
+                    letterSpacing: 1.4,
+                    color: AppColors.accent,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _templateName(TemplateKind kind) {
+    switch (kind) {
+      case TemplateKind.face:
+        return 'Face';
+      case TemplateKind.torso:
+        return 'Torso';
+      case TemplateKind.plant:
+        return 'Plant';
+      case TemplateKind.custom:
+        return 'Custom';
+    }
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _InfoRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Expanded(
+            child: Text(label,
+                style: AppText.ui(size: 13, color: AppColors.inkMuted)),
+          ),
+          Text(value, style: AppText.serifBody(size: 14)),
+        ],
+      ),
     );
   }
 }
